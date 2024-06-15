@@ -1,6 +1,14 @@
 #! /usr/bin/env python3
 
+# -=-=- Imports and Globals -=-=- #
+
 import pyttsx3
+
+
+# -=-=- Classes -=-=- #
+
+
+# -=-=- Functions -=-=- #
 
 def init():
     engine = pyttsx3.init()
@@ -18,13 +26,4 @@ def say(tts, msg):
     tts.runAndWait()
 
 
-## -=-=- MAIN -=-=- #
-
-def main():
-    tts = init()
-    say(tts, "I will speak this text")
-    # save("I will speak this text")
-
-if __name__ == "__main__":
-    main()
-# EOF
+## EOF
