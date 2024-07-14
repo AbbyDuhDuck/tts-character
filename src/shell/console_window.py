@@ -1,3 +1,9 @@
+#! /usr/bin/env python3
+
+"""DocString"""
+
+# -=-=- Imports & Globals -=-=- #
+
 import sys
 from threading import Thread
 import asyncio
@@ -7,20 +13,32 @@ import curses
 import math
 from curses import wrapper
 from curses.textpad import Textbox, rectangle
-import os
+from os import system
 
 SYSTEM_TITLE = "Artamis Streaming Console"
-os.system("title " + SYSTEM_TITLE)
+system("title " + SYSTEM_TITLE)
+
+FIFO_PATH = f'./tmp/out.fifo'
+CONSOLE_PATH = __file__
 
 # curses.init_pair(30, curses.COLOR_BLUE, curses.COLOR_BLACK)
 # BLUE_TEXT = curses.color_pair(30)
+
+# -=-=- Functions -=-=- #
+
+# -=-=- Classes -=-=- #
+
 
 class Shell:
     def __init__(self):
         self.print_log = ""
         self.pipe_status = False
         self.twitch_status = False
+        self.twitch_is_live = False
         self.youtube_status = False
+        self.youtube_is_live = False
+
+        self.stopping = False
 
     def _run_(self, stdscr: curses.window):
         self._init_(stdscr)
@@ -32,6 +50,11 @@ class Shell:
         self._reader_thread_ = t = Thread(target=self._reader_())
         t.daemon = True
         t.start()
+
+    def _stop_(self):
+        self.stopping = True
+        self.print("Shell Stopping...")
+        self._out('!stop')
 
     def _init_(self, stdscr: curses.window):
         self.stdscr = stdscr
@@ -68,9 +91,15 @@ class Shell:
         connection = ""
         # -=- #
         if self.twitch_status:
-            connection += "Tw "
+            connection += "Tw"
+            if not self.twitch_is_live:
+                connection += "*"
+            connection += " "
         if self.youtube_status:
-            connection += "YT "
+            connection += "YT"
+            if not self.youtube_is_live:
+                connection += "*"
+            connection += " "
         # -=- #
         if self.pipe_status and not connection:
             connection = "Connecting"
@@ -125,17 +154,27 @@ class Shell:
         self.prompt_window.refresh()
         return usr_in
     
-    def _status_(self, opt, status, *_):
+    def _status_(self, opt, status, is_live='0', *_):
         if opt == "Twitch":
             try: self.twitch_status = bool(int(status))
             finally: 
                 self.print(f"Twitch Chat - {self.twitch_status and 'Connected' or 'Disconnected'}")
-                self._update_status()
+            # -=-=- #
+            try: self.twitch_is_live = bool(int(is_live))
+            finally: 
+                self.print(f"Twitch Stream {self.twitch_is_live and 'is' or 'is not'} Live")
+            # -=-=- #
+            self._update_status()
         if opt == "YouTube":
             try: self.youtube_status = bool(int(status))
             finally:
-                self.print(f"YouTube Chat - {self.twitch_status and 'Connected' or 'Disconnected'}")
-                self._update_status()
+                self.print(f"YouTube Chat - {self.youtube_status and 'Connected' or 'Disconnected'}")
+            # -=-=- #
+            try: self.youtube_is_live = bool(int(is_live))
+            finally:
+                self.print(f"YouTube Stream {self.youtube_is_live and 'is' or 'is not'} Live")
+            # -=-=- #
+            self._update_status()
     
     def _command_(self, raw: str):
         if not raw.startswith('!'): return
@@ -143,11 +182,13 @@ class Shell:
         cmd = raw.split(' ')
         cmd, args = cmd[0][1:], cmd[1:]
         # -=-=- #
+        if cmd == '!': cmd = 'say'
+        # -=-=- #
         if cmd == 'stop':
-            pass
+            self._stop_()
         elif cmd in ['arti', 'artamis', 'greet', 'say']:
             # should never recieve these commands from the server
-            self._out(raw)
+            self._out(f"!{cmd} {' '.join(args)}")
         elif cmd == 'status':
             self._status_(*args)
         else:
@@ -155,7 +196,6 @@ class Shell:
 
     def _reader_(self):
         def _main():
-            FIFO_PATH = './tmp/out.fifo'
             out_fifo = open(FIFO_PATH, 'r+', encoding='utf-8', errors='ignore')
             # self.print(str(out_fifo))
             self.print("Connected to Artamis!")
@@ -190,17 +230,25 @@ class Shell:
             _ = self.input(msg, input_prompt="", hide=True)
             # -=- Main Loop -=- #
             prompt = "Type STOP to stop\n\n!say [...] -> say something\n!artamis !arti -> explain artamis\n!greet [user]"
-            while True:
+            while not self.stopping:
                 usr_in = self.input(prompt)
-                if usr_in.startswith('!'):
-                    self._command_(usr_in)
                 if usr_in.lower() == 'stop':
-                    self.print("Shell Stopping...")
-                    self._out('!stop')
-                    break
+                    self._stop_()
+                elif usr_in.startswith('!'):
+                    self._command_(usr_in)
+                else:
+                    self.print(f"Unknown Input: {usr_in}")
             sleep(3)
         return _main
 
-shell = Shell()
-wrapper(shell._run_)
 
+# -=-=-=- MAIN -=-=-=- #
+
+def __main__():
+    shell = Shell()
+    wrapper(shell._run_)
+
+if __name__ == "__main__":
+    __main__()
+
+# EOF

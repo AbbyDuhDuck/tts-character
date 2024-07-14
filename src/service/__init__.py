@@ -1,14 +1,11 @@
 #! /usr/bin/env python3
 
-# -=-=- Main Source -=-=- #
-'''
-put docstring stuff here
-'''
+"""DocString"""
 
 # -=-=- Imports & Globals -=-=- #
 
-# import shell
-# import service
+from . import twitch
+from . import youtube
 
 # -=-=- Functions -=-=- #
 

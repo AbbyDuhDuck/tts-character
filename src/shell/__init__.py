@@ -1,14 +1,10 @@
 #! /usr/bin/env python3
 
-# -=-=- Main Source -=-=- #
-'''
-put docstring stuff here
-'''
+"""DocString"""
 
 # -=-=- Imports & Globals -=-=- #
 
-# import shell
-# import service
+# import src.shell.console as console
 
 # -=-=- Functions -=-=- #
 

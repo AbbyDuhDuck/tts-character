@@ -30,22 +30,7 @@ ENGINE = TTS.Engine('artamis')
 ENGINE.start()
 
 def start_shell():
-    FIFO_PATH = './tmp/out.fifo'
-
-    out_fifo = open(FIFO_PATH, 'w+', encoding='utf-8', errors='ignore')
-    print("out_fifo:", out_fifo)
-
-    p = Popen(
-        [sys.executable, 'shell.py'],
-        creationflags=CREATE_NEW_CONSOLE,
-        stderr=PIPE,
-        pipesize=4096,  # Linux has like 65k which is just too much for us.
-        bufsize=4096,  # No effect I guess. But better safe than sorry.
-        encoding='utf-8', errors='ignore',
-    )
-
-    os.set_blocking(p.stderr.fileno(), False)  # That's what you are looking for
-    return p, out_fifo
+    pass
 
 # this will be called when the event READY is triggered, which will be on bot start
 def on_ready(shell_out):
@@ -81,56 +66,13 @@ async def test_command(cmd: ChatCommand):
         await cmd.reply(f'{cmd.user.name}: {cmd.parameter}')
 
 
-async def start_chatbot(proc, shell_out):
-    # set up twitch api instance and add user authentication with some scopes
-    twitch = await Twitch(APP_ID, APP_SECRET)
-    auth = UserAuthenticator(twitch, USER_SCOPE)
-    token, refresh_token = await auth.authenticate()
-    await twitch.set_user_authentication(token, USER_SCOPE, refresh_token)
-
-    # create chat instance
-    twitch_chat = await Chat(twitch)
-
-    # register the handlers for the events you want
-
-    # listen to when the bot is done starting up and ready to join channels
-    twitch_chat.register_event(ChatEvent.READY, on_ready(shell_out))
-    # listen to chat messages
-    twitch_chat.register_event(ChatEvent.MESSAGE, on_twitch_message(shell_out))
-    # listen to channel subscriptions
-    # chat.register_event(ChatEvent.SUB, on_sub)
-    # there are more events, you can view them all in this documentation
-
-    # you can directly register commands and their handlers, this will register the !reply command
-    # chat.register_command('reply', test_command)
-
-    # return twitch, chat
-    twitch_chat.start()
+# async def start_chatbot(proc, shell_out):
+    
 
 # async def init_youtube():
-    # chat = LiveChatAsync(secret.youtube.VIDEO_ID, callback = func)
-    youtube_chat = pytchat.create(secret.youtube.VIDEO_ID)
-    # livechat = LiveChatAsync(secret.youtube.VIDEO_ID, callback = func, direct_mode=True)
-    _print(shell_out, "!status YouTube 1")
-
-    # return livechat
-    while youtube_chat.is_alive():
-        # sync chat
-        for c in youtube_chat.get().sync_items():
-            # print(f"{c.datetime} [{c.author.name}]- {c.message}")
-            await on_message(shell_out, 'YouTube', c.author.name, c.message)
+    
         
-        # sync internal messages
-        proc.stderr.flush()
-        usr_in = proc.stderr.readline().strip()
-        if usr_in != '':            
-            if usr_in.lower() == '!stop':
-                _print(shell_out, "Artamis Stopping...")
-                await stop_all(twitch, twitch_chat, youtube_chat)
-            elif usr_in.startswith('!'):
-                _command_(shell_out, usr_in)
-            else:
-                print("Recieved:", usr_in)
+        
         
         # print("--")
         # await asyncio.sleep(1)
@@ -196,7 +138,7 @@ async def options_menu():
             exit(0)
 
 def main():
-    proc, out = start_shell()
+    # proc, out = start_shell()
     # input('press enter')
     # while True:
     #     usr_in = p.stderr.readline().decode("utf-8").strip()
@@ -204,8 +146,27 @@ def main():
     #         continue
 
         
-    asyncio.run(start_chatbot(proc, out))
+    # asyncio.run(start_chatbot(proc, out))
     # asyncio.run(init_youtube())
+
+
+    from src.service.twitch import TwitchService
+    from src.service.youtube import YouTubeService
+    from src.shell.console import Shell
+
+    shell = Shell(True)
+    shell.start()
+
+    twitch = TwitchService()
+    twitch.on_out(shell._out)
+    shell.on_stop(twitch.stop)
+    twitch.start()
+
+    youtube = YouTubeService()
+    youtube.on_out(shell._out)
+    shell.on_stop(youtube.stop)
+    youtube.start()
+
 
 if __name__=='__main__':
     main()

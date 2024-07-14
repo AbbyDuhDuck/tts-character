@@ -1,26 +1,9 @@
-!status Twitch 1
-
-!status YouTube 1
-
-Saying: hello chay
-
-Saying: hello chat
-
-Greeting Twitch user: abbyduhduck
-
-Greeting Twitch user: nebupookins
-
-Greeting YouTube user: Abby Duck
-
-Saying: I have both chats beeming into my brain now
-
-Saying: well be starting in a moment
-
-Saying: Hello chat
-My name is Artemis and I'm the A.I. host for this channel alongside Abby here.
-I do random stuff alongside Abby and help with keeping things running smoothly - Depending on how much energy I have, I may or may not attend or participate.
-
-Greeting User: nebu
-
-Greeting YouTube user: Zuri Shelton
-
+!status Twitch 1 0
+!status YouTube 1 0
+Youtube message from Abby Duck: Say Hello and Artamis'll greet you
+Greeting User: Abby Duck
+!status YouTube 1 0
+!status Twitch 0 0
+!status YouTube 0 0
+Stopping Console Controller
+Recieved User Command `stop` - []

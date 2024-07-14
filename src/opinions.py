@@ -1,5 +1,58 @@
+#! /usr/bin/env python3
+
+"""DocString"""
+
+# -=-=- Imports & Globals -=-=- #
 
 import random
+
+# -=-=- Functions -=-=- #
+
+# -=-=- Classes -=-=- #
+
+class PeopleManager:
+    def __init__(self) -> None:
+        pass
+
+    def get_greeting(self, *users):
+        pass
+
+    def greeted(self, *users):
+        pass
+
+    def commit_recall(self):
+        """remember the users from today in the returning people list"""
+        pass
+
+    def load(self, filepath: str):
+        """load the internal state of known viewers"""
+        pass
+
+    def save(self, filepath: str):
+        """save the internal state of known viewers"""
+        # greeted today
+        # returning ppl
+        # well known viewers
+        pass
+        
+
+class OpinionManager:
+    def __init__(self) -> None:
+        pass
+
+    def add_opinion(self):
+        pass
+
+    def get_opinion(self):
+        pass
+
+    def load_all(self, path: str):
+        pass
+
+    def load(self, filepath: str):
+        pass
+
+# -=-=- OLD -=-=- #
 
 def get_greeting(user):
     greeting = random.choice([
