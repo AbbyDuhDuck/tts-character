@@ -6,6 +6,8 @@
 
 import random
 
+from json import load as load_json, dump as dump_json
+
 # import commands
 
 # -=-=- Functions -=-=- #
@@ -141,14 +143,26 @@ class UserManager:
 
     def load(self, filepath: str):
         """load the internal state of known viewers"""
-        pass
+        with open(filepath, 'r') as file:
+            obj = load_json(file)
+
+        if 'seen_users' in obj: self.seen_users = obj['seen_users']
+        if 'returning_users' in obj: self.returning_users = obj['returning_users']
+        if '_ignored_users' in obj: self._ignored_users = obj['_ignored_users']
+        if 'user_aliases' in obj: self.user_aliases = obj['user_aliases']
+        if 'special_user_data' in obj: self.special_user_data = obj['special_user_data']
 
     def save(self, filepath: str):
         """save the internal state of known viewers"""
-        # greeted today
-        # returning ppl
-        # well known viewers
-        pass
+        obj = {}
+        obj['seen_users'] = self.seen_users
+        obj['returning_users'] = self.returning_users
+        obj['_ignored_users'] = self._ignored_users
+        obj['user_aliases'] = self.user_aliases
+        obj['special_user_data'] = self.special_user_data
+
+        with open(filepath, 'w') as file:
+            dump_json(obj, file, indent=2)
 
     # -=-=- #
 
@@ -289,9 +303,11 @@ if __name__ == '__main__':
     for greeting in users.get_greeting(*u):
         print(greeting)
 
-    # users.save("./settings/users.data")
+    users.add_user(*u)
+    users.save("./settings/users.data")
 
-    # users = UserManager()
-    # users.load("./settings/users.data")
-    # print(users.can_greet(*u))
-    # print(users.get_greeting(*u))
+    users = UserManager()
+    users.load("./settings/users.data")
+    print(users.can_greet(*u))
+    for greeting in users.get_greeting(*u):
+        print(greeting)
