@@ -38,6 +38,8 @@ class Shell:
         self.youtube_status = False
         self.youtube_is_live = False
 
+        self.game_name = ''
+
         self.stopping = False
 
     def _run_(self, stdscr: curses.window):
@@ -107,6 +109,11 @@ class Shell:
             status += "Status: Offline"
         else:
             status += "Status: %s" % connection.strip()
+
+        if self.game_name != '':
+            status += f"  Game: {self.game_name}"
+        else: 
+            status += "  No Game!"
         
         self.status_window.clear()
         self.status_window.addstr(0, 0, status)
@@ -191,6 +198,10 @@ class Shell:
             self._out(f"!{cmd} {' '.join(args)}")
         elif cmd == 'status':
             self._status_(*args)
+        elif cmd == 'game':
+            self.game_name = args[0]
+            self._update_status()
+            self.print(f"Game set to: {args[0]}")
         else:
             self.print(f'Unknown Command `{cmd}` - {args}')
 

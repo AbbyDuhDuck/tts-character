@@ -79,9 +79,11 @@ class Shell:
         t.daemon = not self.keep_alive
         t.start()
     
-    def _out(self, message: str):
+    def _out(self, message: str, do_print:bool=False):
         print(message, file=self.fifo_out)
         self.fifo_out.flush()
+        if do_print:
+            print(message)
         # print(message.strip() + "\n", file=self.fifo_out)
     
     def _stop_(self, external=False):
